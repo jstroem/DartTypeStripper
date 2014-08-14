@@ -18,7 +18,14 @@ main(List<String> args) {
     exit(0);
   }
 
-  for (var arg in args) {
+  for (String arg in args) {
+
+    //Handle -Partial flag, such the method sigs are left as is
+    if (arg == '-Partial') {
+      STRIP_METHOD_SIG = false;
+      continue;
+    }
+
     StripCodeFormatterImpl cf = new StripCodeFormatterImpl(const FormatterOptions());
     File file = new File(arg); 
     var src = file.readAsStringSync();
