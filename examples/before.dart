@@ -1,17 +1,10 @@
-
-const dsadasd = "123123";
-var test = 123123;
-final test2 = "123";
-
 class Person {
   String name;
   num salery;
-  var test = "123";
   
-  Person(String name, int salery, {int test: 123, num te2: 1234}) {
+  Person(String name, int salery) {
     this.name = name;
     this.salery = salery / 1000;
-    var test = "123";
   }
   
   String get firstName => name.split(' ')[0];
