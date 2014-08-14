@@ -63,7 +63,6 @@ class StripCodeFormatterImpl extends CodeFormatterImpl {
 class StripSourceVisitor extends SourceVisitor {
   StripSourceVisitor(options, lineInfo, source, preSelection): super(options, lineInfo, source, preSelection);
   
-  @override
   visitSimpleFormalParameter(SimpleFormalParameter node) {
      visitMemberMetadata(node.metadata);
      modifier(node.keyword);
@@ -74,7 +73,6 @@ class StripSourceVisitor extends SourceVisitor {
      visit(node.identifier);
    }
 
-  @override
   visitFunctionDeclaration(FunctionDeclaration node) {
     preserveLeadingNewlines();
     visitMemberMetadata(node.metadata);
@@ -88,12 +86,11 @@ class StripSourceVisitor extends SourceVisitor {
     visit(node.functionExpression);
   }
 
-  @override
   visitVariableDeclarationList(VariableDeclarationList node) {
     visitMemberMetadata(node.metadata);
     modifier(node.keyword);
     //visitNode(node.type, followedBy: space); This is the type of the variables, so instead we put in 'var'
-    if (node.type != null) {
+    if (node.type != null && node.keyword == null) {
       Identifier ident = new SimpleIdentifier(new KeywordToken(Keyword.VAR, node.type.offset));
       visitNode(ident, followedBy: space);
     }
@@ -125,7 +122,6 @@ class StripSourceVisitor extends SourceVisitor {
     }
   }
   
-  @override
   visitMethodDeclaration(MethodDeclaration node) {
       visitMemberMetadata(node.metadata);
       modifier(node.externalKeyword);
@@ -142,7 +138,6 @@ class StripSourceVisitor extends SourceVisitor {
       visitPrefixedBody(nonBreakingSpace, node.body);
     }
   
-  @override
   visitFunctionTypedFormalParameter(FunctionTypedFormalParameter node) {
     //If a method is used in the parameter list and it has a return type, we strip this.
     if (!STRIP_METHOD_SIG)
