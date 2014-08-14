@@ -21,6 +21,10 @@ class Corporation {
   
   Corporation() {
     persons = new List<Person>();
+    
+    for(String a in ["a"]) {
+      
+    }
   }
   
   List<Person> get employees => persons;

@@ -1,40 +1,48 @@
 #!/usr/bin/env dart
 
 import 'dart:io';
-
 import 'package:analyzer/src/services/formatter_impl.dart';
 import 'package:analyzer/src/generated/ast.dart';
 import 'package:analyzer/src/generated/scanner.dart';
+import 'package:path/path.dart';
 
 
  bool STRIP_METHOD_SIG = true;
+ String OUTPUT_DIR = null;
 
 main(List<String> args) {
-  //print('working dir ${new File('.').resolveSymbolicLinksSync()}');
-
   if (args.length == 0) {
     args = ["../examples/before.dart"];
   }
 
   List<String> files = new List<String>();
   
-  for (String arg in args) {
-    //Handle -Partial flag, such the method sigs are left as is
-    if (arg == '-Partial' || arg == '-P') {
+  for (var i = 0; i < args.length; i++){
+    String arg = args[i];
+    if (arg == '--partial' || arg == '-p') {
       STRIP_METHOD_SIG = false;
+    } else if (arg == '-o' || arg == '--output') {
+      OUTPUT_DIR = args[++i];
     } else {
       files.add(arg);
     }
   }
   
+  Directory dir = null;
+  if (OUTPUT_DIR != null) dir = new Directory(OUTPUT_DIR);
+  
   for (String arg in files) {
     StripCodeFormatterImpl cf = new StripCodeFormatterImpl(const FormatterOptions());
     CodeFormatter finisher = new CodeFormatter();
-    File file = new File(arg); 
+    File file = new File(arg);
     var src = file.readAsStringSync();
     FormattedSource fs = cf.format(CodeKind.COMPILATION_UNIT, src);
     fs = finisher.format(CodeKind.COMPILATION_UNIT, fs.source);
-    print(fs.source);
+    if (dir != null){
+      new File(dir.absolute.path + Platform.pathSeparator + basename(file.path)).writeAsStringSync(fs.source);  
+    } else {
+      print(fs.source);
+    }
   }
 }
 
@@ -161,6 +169,17 @@ class StripSourceVisitor extends SourceVisitor {
     token(node.period);
     visit(node.identifier);
     visit(node.parameters);
+  }
+
+  visitDeclaredIdentifier(DeclaredIdentifier node) {
+    modifier(node.keyword);
+    //In for loops if there is a type used in the variable decl, we put a 'var' in instead. 
+    //visitNode(node.type, followedBy: space);
+    if (node.type != null) {
+      Identifier ident = new SimpleIdentifier(new KeywordToken(Keyword.VAR, node.type.offset));
+      visitNode(ident, followedBy: space);
+    }
+    visit(node.identifier);
   }
 }
 
