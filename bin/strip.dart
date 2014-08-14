@@ -141,5 +141,14 @@ class StripSourceVisitor extends SourceVisitor {
       }
       visitPrefixedBody(nonBreakingSpace, node.body);
     }
+  
+  @override
+  visitFunctionTypedFormalParameter(FunctionTypedFormalParameter node) {
+    //If a method is used in the parameter list and it has a return type, we strip this.
+    if (!STRIP_METHOD_SIG)
+      visitNode(node.returnType, followedBy: space);
+    visit(node.identifier);
+    visit(node.parameters);
+  }
 }
 

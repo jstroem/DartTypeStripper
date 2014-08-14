@@ -6,7 +6,7 @@ class Person {
   String name;
   num salery;
   
-  Person(String name, int salery) {
+  Person(String name, int salery, {int test: 123, num te2: 1234}) {
     this.name = name;
     this.salery = salery / 1000;
   }
