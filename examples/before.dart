@@ -1,3 +1,7 @@
+
+const dsadasd = "123123";
+var test = 123123;
+
 class Person {
   String name;
   num salery;

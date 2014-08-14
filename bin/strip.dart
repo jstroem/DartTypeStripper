@@ -54,22 +54,17 @@ class StripCodeFormatterImpl extends CodeFormatterImpl {
 }
 
 class StripSourceVisitor extends SourceVisitor { 
-  StripSourceVisitor(options, lineInfo, source, preSelection): super(options, lineInfo, source, preSelection);
-  
-  @override
-  visitTypeName(TypeName node) {
-    visit(node.name);
-    visit(node.typeArguments);
-  }
-  
+  StripSourceVisitor(options, lineInfo, source, preSelection): super(options, lineInfo, source, preSelection);  
 
   @override
   visitVariableDeclarationList(VariableDeclarationList node) {
     visitMemberMetadata(node.metadata);
     modifier(node.keyword);
     //visitNode(node.type, followedBy: space); This is the type of the variables, so instead we put in 'var'
-    Identifier ident = new SimpleIdentifier(new KeywordToken(Keyword.VAR, node.type.beginToken.offset));
-    visitNode(ident, followedBy: space);
+    if (node.type != null) {
+      Identifier ident = new SimpleIdentifier(new KeywordToken(Keyword.VAR, node.type.offset));
+      visitNode(ident, followedBy: space);
+    }
 
     var variables = node.variables;
     // Decls with initializers get their own lines (dartbug.com/16849)
