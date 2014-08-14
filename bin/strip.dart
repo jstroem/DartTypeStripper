@@ -81,7 +81,20 @@ class StripSourceVisitor extends SourceVisitor {
      visit(node.identifier);
    }
 
-  
+  @override
+  visitFunctionDeclaration(FunctionDeclaration node) {
+    preserveLeadingNewlines();
+    visitMemberMetadata(node.metadata);
+    modifier(node.externalKeyword);
+    
+    //Only print formal argument types if doing partial strip 
+    if (!STRIP_METHOD_SIG)  
+      visitNode(node.returnType, followedBy: space);
+   
+    modifier(node.propertyKeyword);
+    visit(node.name);
+    visit(node.functionExpression);
+  }
 
   @override
   visitVariableDeclarationList(VariableDeclarationList node) {
