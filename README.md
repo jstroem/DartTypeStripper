@@ -20,5 +20,6 @@ To use the tool just do:
 There is two optional flags to put in.
 
 Partial `-p` or `--partial` that disables type stripping from method and function signatures.
+
 Output `-o` or `--output` gives the location to place the stripped files. If abscent output will be printed to stdout.
 
