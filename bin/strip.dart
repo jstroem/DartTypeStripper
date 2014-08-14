@@ -29,9 +29,11 @@ main(List<String> args) {
   
   for (String arg in files) {
     StripCodeFormatterImpl cf = new StripCodeFormatterImpl(const FormatterOptions());
+    CodeFormatter finisher = new CodeFormatter();
     File file = new File(arg); 
     var src = file.readAsStringSync();
     FormattedSource fs = cf.format(CodeKind.COMPILATION_UNIT, src);
+    fs = finisher.format(CodeKind.COMPILATION_UNIT, fs.source);
     print(fs.source);
   }
 }
