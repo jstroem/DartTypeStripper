@@ -147,5 +147,18 @@ class StripSourceVisitor extends SourceVisitor {
     visit(node.identifier);
     visit(node.parameters);
   }
+  
+
+  visitFieldFormalParameter(FieldFormalParameter node) {
+    token(node.keyword, followedBy: space);
+    //If a field is set using formal parameters we strip the type.
+    if (!STRIP_METHOD_SIG)
+      visitNode(node.type, followedBy: space);
+    
+    token(node.thisToken);
+    token(node.period);
+    visit(node.identifier);
+    visit(node.parameters);
+  }
 }
 
