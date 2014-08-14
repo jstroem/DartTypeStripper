@@ -10,22 +10,24 @@ import 'package:analyzer/src/generated/scanner.dart';
  bool STRIP_METHOD_SIG = true;
 
 main(List<String> args) {
-  args = ["../examples/before.dart"];
   //print('working dir ${new File('.').resolveSymbolicLinksSync()}');
 
   if (args.length == 0) {
-    print('Usage: parser_driver [files_to_parse]');
-    exit(0);
+    args = ["../examples/before.dart"];
   }
 
+  List<String> files = new List<String>();
+  
   for (String arg in args) {
-
     //Handle -Partial flag, such the method sigs are left as is
-    if (arg == '-Partial') {
+    if (arg == '-Partial' || arg == '-P') {
       STRIP_METHOD_SIG = false;
-      continue;
+    } else {
+      files.add(arg);
     }
-
+  }
+  
+  for (String arg in files) {
     StripCodeFormatterImpl cf = new StripCodeFormatterImpl(const FormatterOptions());
     File file = new File(arg); 
     var src = file.readAsStringSync();
