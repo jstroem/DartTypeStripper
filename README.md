@@ -18,6 +18,7 @@ To use the tool just do:
 	./strip.dart [-p] [-o dir] file(s)
 
 There is two optional flags to put in.
-partial `-p` or `--partial` is a flag which does the stripper does not remove method and function types.
-output `-o` or `--output` is a flag to give a output folder and all the files given into the tool will be put in there. Otherwise the output will come in the pipe.
+
+Partial `-p` or `--partial` that disables type stripping from method and function signatures.
+Output `-o` or `--output` gives the location to place the stripped files. If abscent output will be printed to stdout.
 
