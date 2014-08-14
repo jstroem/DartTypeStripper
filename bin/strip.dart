@@ -69,6 +69,19 @@ class StripSourceVisitor extends SourceVisitor {
     visit(node.typeArguments);
   }
   
+  @override
+  visitSimpleFormalParameter(SimpleFormalParameter node) {
+     visitMemberMetadata(node.metadata);
+     modifier(node.keyword);
+     
+     //Only print formal argument types if doing partial strip 
+     if (!STRIP_METHOD_SIG)
+       visitNode(node.type, followedBy: nonBreakingSpace);
+    
+     visit(node.identifier);
+   }
+
+  
 
   @override
   visitVariableDeclarationList(VariableDeclarationList node) {
