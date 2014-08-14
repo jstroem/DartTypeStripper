@@ -18,7 +18,14 @@ main(List<String> args) {
     exit(0);
   }
 
-  for (var arg in args) {
+  for (String arg in args) {
+
+    //Handle -Partial flag, such the method sigs are left as is
+    if (arg == '-Partial') {
+      STRIP_METHOD_SIG = false;
+      continue;
+    }
+
     StripCodeFormatterImpl cf = new StripCodeFormatterImpl(const FormatterOptions());
     File file = new File(arg); 
     var src = file.readAsStringSync();
@@ -53,8 +60,33 @@ class StripCodeFormatterImpl extends CodeFormatterImpl {
   }
 }
 
-class StripSourceVisitor extends SourceVisitor { 
-  StripSourceVisitor(options, lineInfo, source, preSelection): super(options, lineInfo, source, preSelection);  
+class StripSourceVisitor extends SourceVisitor {
+  StripSourceVisitor(options, lineInfo, source, preSelection): super(options, lineInfo, source, preSelection);
+  
+  @override
+  visitSimpleFormalParameter(SimpleFormalParameter node) {
+     visitMemberMetadata(node.metadata);
+     modifier(node.keyword);
+     
+     //Only print formal argument types if doing partial strip 
+     if (!STRIP_METHOD_SIG) visitNode(node.type, followedBy: nonBreakingSpace);
+    
+     visit(node.identifier);
+   }
+
+  @override
+  visitFunctionDeclaration(FunctionDeclaration node) {
+    preserveLeadingNewlines();
+    visitMemberMetadata(node.metadata);
+    modifier(node.externalKeyword);
+    
+    //Only print formal argument types if doing partial strip 
+    if (!STRIP_METHOD_SIG) visitNode(node.returnType, followedBy: space);
+   
+    modifier(node.propertyKeyword);
+    visit(node.name);
+    visit(node.functionExpression);
+  }
 
   @override
   visitVariableDeclarationList(VariableDeclarationList node) {
