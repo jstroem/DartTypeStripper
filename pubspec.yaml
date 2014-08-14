@@ -1,0 +1,4 @@
+name: DartTypeStripper
+description: Command line tool for stripping types of Dart programs
+dependencies:
+  analyzer: any
