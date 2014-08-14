@@ -3,9 +3,15 @@
 import 'dart:io';
 
 import 'package:analyzer/src/services/formatter_impl.dart';
+import 'package:analyzer/src/generated/ast.dart';
+import 'package:analyzer/src/generated/scanner.dart';
+
+
+ bool STRIP_METHOD_SIG = true;
 
 main(List<String> args) {
-  print('working dir ${new File('.').resolveSymbolicLinksSync()}');
+  args = ["../examples/before.dart"];
+  //print('working dir ${new File('.').resolveSymbolicLinksSync()}');
 
   if (args.length == 0) {
     print('Usage: parser_driver [files_to_parse]');
@@ -13,7 +19,7 @@ main(List<String> args) {
   }
 
   for (var arg in args) {
-    CodeFormatter cf = new StripCodeFormatterImpl(const FormatterOptions());
+    StripCodeFormatterImpl cf = new StripCodeFormatterImpl(const FormatterOptions());
     File file = new File(arg); 
     var src = file.readAsStringSync();
     FormattedSource fs = cf.format(CodeKind.COMPILATION_UNIT, src);
@@ -40,14 +46,73 @@ class StripCodeFormatterImpl extends CodeFormatterImpl {
 
     var formattedSource = formatter.writer.toString();
 
-    checkTokenStreams(startToken, tokenize(formattedSource),
-                      allowTransforms: options.codeTransforms);
+    /*checkTokenStreams(startToken, tokenize(formattedSource),
+                      allowTransforms: options.codeTransforms);*/
 
     return new FormattedSource(formattedSource, formatter.selection);
   }
 }
 
-class StripSourceVisitor extends SourceVisitor {
+class StripSourceVisitor extends SourceVisitor { 
   StripSourceVisitor(options, lineInfo, source, preSelection): super(options, lineInfo, source, preSelection);
+  
+  @override
+  visitTypeName(TypeName node) {
+    visit(node.name);
+    visit(node.typeArguments);
+  }
+  
+
+  @override
+  visitVariableDeclarationList(VariableDeclarationList node) {
+    visitMemberMetadata(node.metadata);
+    modifier(node.keyword);
+    //visitNode(node.type, followedBy: space); This is the type of the variables, so instead we put in 'var'
+    Identifier ident = new SimpleIdentifier(new KeywordToken(Keyword.VAR, node.type.beginToken.offset));
+    visitNode(ident, followedBy: space);
+
+    var variables = node.variables;
+    // Decls with initializers get their own lines (dartbug.com/16849)
+    if (variables.any((v) => (v.initializer != null))) {
+      var size = variables.length;
+      if (size > 0) {
+        var variable;
+        for (var i = 0; i < size; i++) {
+          variable = variables[i];
+          if (i > 0) {
+            var comma = variable.beginToken.previous;
+            token(comma);
+            newlines();
+          }
+          if (i == 1) {
+            indent(2);
+          }
+          variable.accept(this);
+        }
+        if (size > 1) {
+          unindent(2);
+        }
+      }
+    } else {
+      visitCommaSeparatedNodes(node.variables);
+    }
+  }
+  
+  @override
+  visitMethodDeclaration(MethodDeclaration node) {
+      visitMemberMetadata(node.metadata);
+      modifier(node.externalKeyword);
+      modifier(node.modifierKeyword);
+      //Here the return type are printed so we don't write anything out.
+      if (!STRIP_METHOD_SIG) visitNode(node.returnType, followedBy: space);
+      
+      modifier(node.propertyKeyword);
+      modifier(node.operatorKeyword);
+      visit(node.name);
+      if (!node.isGetter) {
+        visit(node.parameters);
+      }
+      visitPrefixedBody(nonBreakingSpace, node.body);
+    }
 }
 
