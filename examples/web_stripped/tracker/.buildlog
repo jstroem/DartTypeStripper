@@ -1,0 +1,36 @@
+---
+build.dart --machine --changed=lib/models.dart --changed=lib/seed.dart
+Unhandled exception:
+No top-level getter 'get:main' declared.
+
+NoSuchMethodError: method not found: 'get:main'
+Receiver: top-level
+Arguments: [...]
+#0      NoSuchMethodError._throwNew (dart:core-patch/errors_patch.dart:166)
+#1      _getMainClosure (dart:builtin:14)
+build.dart finished [61 ms]
+
+---
+build.dart --machine --changed=lib/models.dart --changed=lib/seed.dart
+Unhandled exception:
+No top-level getter 'get:main' declared.
+
+NoSuchMethodError: method not found: 'get:main'
+Receiver: top-level
+Arguments: [...]
+#0      NoSuchMethodError._throwNew (dart:core-patch/errors_patch.dart:166)
+#1      _getMainClosure (dart:builtin:14)
+build.dart finished [77 ms]
+
+---
+build.dart --machine --changed=web/elements/task_element.dart --changed=web/elements/task_form_element.dart --c...
+Unhandled exception:
+No top-level getter 'get:main' declared.
+
+NoSuchMethodError: method not found: 'get:main'
+Receiver: top-level
+Arguments: [...]
+#0      NoSuchMethodError._throwNew (dart:core-patch/errors_patch.dart:166)
+#1      _getMainClosure (dart:builtin:14)
+build.dart finished [165 ms]
+

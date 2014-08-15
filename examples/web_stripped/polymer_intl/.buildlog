@@ -1,0 +1,24 @@
+---
+build.dart --machine --changed=test/polymer_intl_test.dart --changed=web/localized.dart --changed=web/messages_...
+Unhandled exception:
+No top-level getter 'get:main' declared.
+
+NoSuchMethodError: method not found: 'get:main'
+Receiver: top-level
+Arguments: [...]
+#0      NoSuchMethodError._throwNew (dart:core-patch/errors_patch.dart:166)
+#1      _getMainClosure (dart:builtin:14)
+build.dart finished [115 ms]
+
+---
+build.dart --machine --changed=test/polymer_intl_test.dart --changed=web/localized.dart --changed=web/messages_...
+Unhandled exception:
+No top-level getter 'get:main' declared.
+
+NoSuchMethodError: method not found: 'get:main'
+Receiver: top-level
+Arguments: [...]
+#0      NoSuchMethodError._throwNew (dart:core-patch/errors_patch.dart:166)
+#1      _getMainClosure (dart:builtin:14)
+build.dart finished [70 ms]
+
