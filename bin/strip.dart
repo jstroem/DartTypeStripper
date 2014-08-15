@@ -37,7 +37,7 @@ main(List<String> args) {
     File file = new File(arg);
     var src = file.readAsStringSync();
     FormattedSource fs = cf.format(CodeKind.COMPILATION_UNIT, src);
-//    fs = finisher.format(CodeKind.COMPILATION_UNIT, fs.source);
+    fs = finisher.format(CodeKind.COMPILATION_UNIT, fs.source);
     if (dir != null){
       new File(dir.absolute.path + Platform.pathSeparator + basename(file.path)).writeAsStringSync(fs.source);  
     } else {
