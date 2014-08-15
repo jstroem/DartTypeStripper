@@ -3,4 +3,3 @@ class Bar {
   Bar(this.x, this.y);
 }
 
-d

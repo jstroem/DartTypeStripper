@@ -1,5 +1,5 @@
 main() {
-  for (int i in [1, 2]) {
+  for (var i in [1, 2]) {
   }
 }
 
