@@ -37,7 +37,7 @@ main(List<String> args) {
     File file = new File(arg);
     var src = file.readAsStringSync();
     FormattedSource fs = cf.format(CodeKind.COMPILATION_UNIT, src);
-    fs = finisher.format(CodeKind.COMPILATION_UNIT, fs.source);
+//    fs = finisher.format(CodeKind.COMPILATION_UNIT, fs.source);
     if (dir != null){
       new File(dir.absolute.path + Platform.pathSeparator + basename(file.path)).writeAsStringSync(fs.source);  
     } else {
@@ -175,7 +175,7 @@ class StripSourceVisitor extends SourceVisitor {
     modifier(node.keyword);
     //In for loops if there is a type used in the variable decl, we put a 'var' in instead. 
     //visitNode(node.type, followedBy: space);
-    if (node.type != null) {
+    if (node.type != null && node.keyword == null) {
       Identifier ident = new SimpleIdentifier(new KeywordToken(Keyword.VAR, node.type.offset));
       visitNode(ident, followedBy: space);
     }
