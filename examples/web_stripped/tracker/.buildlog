@@ -8,3 +8,8 @@ build.dart --machine --changed=web/elements/task_element.dart --changed=web/elem
 
 build.dart finished [1840 ms]
 
+---
+build.dart --machine --full
+
+build.dart finished [899 ms]
+

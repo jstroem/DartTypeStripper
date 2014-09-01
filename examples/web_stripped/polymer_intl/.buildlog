@@ -8,3 +8,8 @@ build.dart --machine --changed=web/messages_all.dart --changed=web/messages_fr.d
 
 build.dart finished [2940 ms]
 
+---
+build.dart --machine --full
+
+build.dart finished [1013 ms]
+
