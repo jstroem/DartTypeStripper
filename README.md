@@ -17,11 +17,15 @@ To use the tool just do:
 
 	./strip.dart [-p] [-o dir] file(s)
 
-There is two optional flags to put in.
+The tool implement these flags:
 
 Partial `-p` or `--partial` that disables type stripping from method and function signatures.
 
+Similarly, '-g' or '--keep-generics' preserves any naked generic types, i.e. T will be kept but List<T> will be removed in a class where T is a type argument.
+
 Output `-o` or `--output` gives the location to place the stripped files. If absent output will be printed to stdout.
+
+
 
 ## Tests
 

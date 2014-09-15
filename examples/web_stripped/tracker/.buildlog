@@ -1,0 +1,20 @@
+---
+build.dart --machine --changed=lib/models.dart --changed=lib/seed.dart
+
+build.dart finished [2200 ms]
+
+---
+build.dart --machine --changed=web/elements/task_element.dart --changed=web/elements/task_form_element.dart --c...
+
+build.dart finished [1840 ms]
+
+---
+build.dart --machine --clean
+
+build.dart finished [2068 ms]
+
+---
+build.dart --machine --full
+
+build.dart finished [1939 ms]
+

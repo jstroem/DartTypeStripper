@@ -7,12 +7,13 @@ import 'package:analyzer/src/generated/scanner.dart';
 import 'package:path/path.dart';
 
 
- bool STRIP_METHOD_SIG = true;
- String OUTPUT_DIR = null;
+bool STRIP_METHOD_SIG = true;
+bool KEEP_GENERIC_TYPES = false;
+String OUTPUT_DIR = null;
 
 main(List<String> args) {
   if (args.length == 0) {
-    args = ["../examples/before.dart"];
+    args = ["../tests/GenericType.dart"];
   }
 
   List<String> files = new List<String>();
@@ -21,6 +22,8 @@ main(List<String> args) {
     String arg = args[i];
     if (arg == '--partial' || arg == '-p') {
       STRIP_METHOD_SIG = false;
+    } else if (arg == '--keep-generics' || arg == '-g') {
+      KEEP_GENERIC_TYPES = true;
     } else if (arg == '-o' || arg == '--output') {
       OUTPUT_DIR = args[++i];
     } else {
@@ -75,17 +78,55 @@ class StripCodeFormatterImpl extends CodeFormatterImpl {
 class StripSourceVisitor extends SourceVisitor {
   StripSourceVisitor(options, lineInfo, source, preSelection): super(options, lineInfo, source, preSelection);
   
+  List<String> typeArguments = new List<String>();
+  
+  
+  visitClassDeclaration(ClassDeclaration node) {
+    
+      typeArguments.clear();
+      if (node.typeParameters != null)
+        node.typeParameters.typeParameters.forEach((TypeParameter ty) => typeArguments.add(ty.name.toString()));
+    
+      preserveLeadingNewlines();
+      visitMemberMetadata(node.metadata);
+      modifier(node.abstractKeyword);
+      token(node.classKeyword);
+      space();
+      visit(node.name);
+      allowContinuedLines((){
+        visit(node.typeParameters);
+        visitNode(node.extendsClause, precededBy: space);
+        visitNode(node.withClause, precededBy: space);
+        visitNode(node.implementsClause, precededBy: space);
+        visitNode(node.nativeClause, precededBy: space);
+        space();
+      });
+      token(node.leftBracket);
+      indent();
+      if (!node.members.isEmpty) {
+        visitNodes(node.members, precededBy: newlines, separatedBy: newlines);
+        newlines();
+      } else {
+        preserveLeadingNewlines();
+      }
+      token(node.rightBracket, precededBy: unindent);
+    } 
+  
+  
   visitSimpleFormalParameter(SimpleFormalParameter node) {
      visitMemberMetadata(node.metadata);
      modifier(node.keyword);
      
      //Only print formal argument types if doing partial strip 
-     if (!STRIP_METHOD_SIG) visitNode(node.type, followedBy: nonBreakingSpace);
+     
+     bool isGenericType = (node.type != null && typeArguments.contains(node.type.name.toString()));     
+     if (!STRIP_METHOD_SIG || (isGenericType && KEEP_GENERIC_TYPES)) visitNode(node.type, followedBy: nonBreakingSpace);
     
      visit(node.identifier);
    }
 
   visitFunctionDeclaration(FunctionDeclaration node) {
+
     preserveLeadingNewlines();
     visitMemberMetadata(node.metadata);
     modifier(node.externalKeyword);
@@ -98,11 +139,18 @@ class StripSourceVisitor extends SourceVisitor {
     visit(node.functionExpression);
   }
 
+  
+  
   visitVariableDeclarationList(VariableDeclarationList node) {
+    
+    bool isGenericType = (node.type != null && typeArguments.contains(node.type.name.toString()));
+    
     visitMemberMetadata(node.metadata);
     modifier(node.keyword);
-    //visitNode(node.type, followedBy: space); This is the type of the variables, so instead we put in 'var'
-    if (node.type != null && node.keyword == null) {
+    
+    if (isGenericType && KEEP_GENERIC_TYPES) {
+      visitNode(node.type, followedBy: space);
+    } else if (node.type != null && node.keyword == null) {
       Identifier ident = new SimpleIdentifier(new KeywordToken(Keyword.VAR, node.type.offset));
       visitNode(ident, followedBy: space);
     }
@@ -138,8 +186,10 @@ class StripSourceVisitor extends SourceVisitor {
       visitMemberMetadata(node.metadata);
       modifier(node.externalKeyword);
       modifier(node.modifierKeyword);
-      //Here the return type are printed so we don't write anything out.
-      if (!STRIP_METHOD_SIG) visitNode(node.returnType, followedBy: space);
+      
+      //Here the return types are printed so we don't write anything out.
+      bool isGenericType = (node.returnType != null && typeArguments.contains(node.returnType.name.toString()));     
+      if (!STRIP_METHOD_SIG ||(isGenericType && KEEP_GENERIC_TYPES)) visitNode(node.returnType, followedBy: space);
       
       modifier(node.propertyKeyword);
       modifier(node.operatorKeyword);
@@ -152,19 +202,22 @@ class StripSourceVisitor extends SourceVisitor {
   
   visitFunctionTypedFormalParameter(FunctionTypedFormalParameter node) {
     //If a method is used in the parameter list and it has a return type, we strip this.
-    if (!STRIP_METHOD_SIG)
+    bool isGenericType = (node.returnType != null && typeArguments.contains(node.returnType.name.toString()));
+    if (!STRIP_METHOD_SIG || (isGenericType && KEEP_GENERIC_TYPES))
       visitNode(node.returnType, followedBy: space);
     visit(node.identifier);
     visit(node.parameters);
   }
   
-
+  //FieldFormalParameter is the used for the special syntax in dart, where you can shorthand assigning an argument directly to a field of the instance.
+  //eg MyConstructor(this.SomeField)  
   visitFieldFormalParameter(FieldFormalParameter node) {
     token(node.keyword, followedBy: space);
     //If a field is set using formal parameters we strip the type.
-    if (!STRIP_METHOD_SIG)
+    bool isGenericType = (node.type != null && typeArguments.contains(node.type.name.toString()));
+    if (!STRIP_METHOD_SIG || (isGenericType && KEEP_GENERIC_TYPES))
       visitNode(node.type, followedBy: space);
-    
+
     token(node.thisToken);
     token(node.period);
     visit(node.identifier);
@@ -174,8 +227,11 @@ class StripSourceVisitor extends SourceVisitor {
   visitDeclaredIdentifier(DeclaredIdentifier node) {
     modifier(node.keyword);
     //In for loops if there is a type used in the variable decl, we put a 'var' in instead. 
-    //visitNode(node.type, followedBy: space);
-    if (node.type != null && node.keyword == null) {
+    bool isGenericType = (node.type != null && typeArguments.contains(node.type.name.toString()));
+    
+    if (isGenericType && KEEP_GENERIC_TYPES) {
+      visitNode(node.type, followedBy: space);  
+    } else if (node.type != null && node.keyword == null) {
       Identifier ident = new SimpleIdentifier(new KeywordToken(Keyword.VAR, node.type.offset));
       visitNode(ident, followedBy: space);
     }

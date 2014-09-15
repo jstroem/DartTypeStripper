@@ -1,0 +1,20 @@
+---
+build.dart --machine --changed=test/polymer_intl_test.dart --changed=web/localized.dart --changed=web/messages_...
+
+build.dart finished [2828 ms]
+
+---
+build.dart --machine --changed=web/messages_all.dart --changed=web/messages_fr.dart --changed=web/messages_pt.d...
+
+build.dart finished [2940 ms]
+
+---
+build.dart --machine --clean
+
+build.dart finished [1696 ms]
+
+---
+build.dart --machine --full
+
+build.dart finished [2019 ms]
+

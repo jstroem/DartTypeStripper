@@ -31,7 +31,7 @@ class Corporation {
   
   void hire(Person p) => persons.add(p);
   
-  bool fire(p) => persons.remove(p);
+  bool fire(Person p) => persons.remove(p);
   
   Person find(String name) => persons.firstWhere((Person p) => p.name == name); 
 }
