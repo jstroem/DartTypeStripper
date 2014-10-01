@@ -50,7 +50,7 @@ main(List<String> args) {
     if (dir != null){
       new File(dir.absolute.path + Platform.pathSeparator + basename(file.path)).writeAsStringSync(fs.source);  
     } else {
-      //print(fs.source);
+      print(fs.source);
     }
   }
 }
@@ -76,9 +76,6 @@ class StripCodeFormatterImpl extends CodeFormatterImpl {
     node.accept(formatter);
 
     var formattedSource = formatter.writer.toString();
-print(formattedSource);
-    checkTokenStreams(startToken, tokenize(formattedSource),
-                      allowTransforms: options.codeTransforms);
 
     return new FormattedSource(formattedSource, formatter.selection);
   }
