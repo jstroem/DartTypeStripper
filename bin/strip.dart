@@ -1,6 +1,7 @@
 #!/usr/bin/env dart
 
 import 'dart:io';
+import 'dart:math';
 import 'package:analyzer/src/services/formatter_impl.dart';
 import 'package:analyzer/src/generated/ast.dart';
 import 'package:analyzer/src/generated/scanner.dart';
@@ -35,25 +36,31 @@ main(List<String> args) {
   if (OUTPUT_DIR != null) dir = new Directory(OUTPUT_DIR);
   
   for (String arg in files) {
-    StripCodeFormatterImpl cf = new StripCodeFormatterImpl(const FormatterOptions());
+    CodeFormatterImpl cf = new StripCodeFormatterImpl(const FormatterOptions());
     CodeFormatter finisher = new CodeFormatter();
     File file = new File(arg);
     var src = file.readAsStringSync();
+    
+    
     FormattedSource fs = cf.format(CodeKind.COMPILATION_UNIT, src);
+
+
+    
     fs = finisher.format(CodeKind.COMPILATION_UNIT, fs.source);
     if (dir != null){
       new File(dir.absolute.path + Platform.pathSeparator + basename(file.path)).writeAsStringSync(fs.source);  
     } else {
-      print(fs.source);
+      //print(fs.source);
     }
   }
 }
 
 class StripCodeFormatterImpl extends CodeFormatterImpl {
   
+  
   StripCodeFormatterImpl(options):super(options);
   
-  @override
+  
   FormattedSource format(CodeKind kind, String source, {int offset, int end,
       int indentationLevel: 0, Selection selection: null}) {
 
@@ -63,13 +70,15 @@ class StripCodeFormatterImpl extends CodeFormatterImpl {
     var node = parse(kind, startToken);
     checkForErrors();
 
+    var t = node.toString();
+    
     var formatter = new StripSourceVisitor(options, lineInfo, source, selection);
     node.accept(formatter);
 
     var formattedSource = formatter.writer.toString();
-
-    /*checkTokenStreams(startToken, tokenize(formattedSource),
-                      allowTransforms: options.codeTransforms);*/
+print(formattedSource);
+    checkTokenStreams(startToken, tokenize(formattedSource),
+                      allowTransforms: options.codeTransforms);
 
     return new FormattedSource(formattedSource, formatter.selection);
   }
@@ -80,6 +89,35 @@ class StripSourceVisitor extends SourceVisitor {
   
   List<String> typeArguments = new List<String>();
   
+  bool printTokens = true;
+  
+  token(Token token, {precededBy(), followedBy(), printToken(tok),
+      int minNewlines: 0}) {
+    if (token != null) {
+      if (needsNewline) {
+        minNewlines = max(1, minNewlines);
+      }
+      var emitted = emitPrecedingCommentsAndNewlines(token, min: minNewlines);
+      if (emitted > 0) {
+        needsNewline = false;
+      }
+      if (precededBy != null) {
+        precededBy();
+      }
+      checkForSelectionUpdate(token);
+      if (printTokens) {
+        if (printToken == null) {
+          append(token.lexeme);
+        } else {
+          printToken(token);
+        }
+      }   
+      if (followedBy != null) {
+        followedBy();
+      }
+      previousToken = token;
+    }
+  }
   
   visitClassDeclaration(ClassDeclaration node) {
     
@@ -132,8 +170,11 @@ class StripSourceVisitor extends SourceVisitor {
     modifier(node.externalKeyword);
     
     //Only print formal argument types if doing partial strip 
-    if (!STRIP_METHOD_SIG) visitNode(node.returnType, followedBy: space);
-   
+    if (STRIP_METHOD_SIG) printTokens = false;      
+    visitNode(node.returnType, followedBy: space);
+    printTokens = true;
+
+    
     modifier(node.propertyKeyword);
     visit(node.name);
     visit(node.functionExpression);
@@ -148,9 +189,13 @@ class StripSourceVisitor extends SourceVisitor {
     visitMemberMetadata(node.metadata);
     modifier(node.keyword);
     
-    if (isGenericType && KEEP_GENERIC_TYPES) {
-      visitNode(node.type, followedBy: space);
-    } else if (node.type != null && node.keyword == null) {
+    if (!(isGenericType && KEEP_GENERIC_TYPES)) printTokens = false;
+
+    visitNode(node.type, followedBy: space);
+    printTokens = true;
+      
+    
+    if (!(isGenericType && KEEP_GENERIC_TYPES) && node.type != null && node.keyword == null) {
       Identifier ident = new SimpleIdentifier(new KeywordToken(Keyword.VAR, node.type.offset));
       visitNode(ident, followedBy: space);
     }
