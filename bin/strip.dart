@@ -50,7 +50,7 @@ main(List<String> args) {
     if (dir != null){
       new File(dir.absolute.path + Platform.pathSeparator + basename(file.path)).writeAsStringSync(fs.source);  
     } else {
-      print(fs.source);
+      stdout.write(fs.source);
     }
   }
 }
