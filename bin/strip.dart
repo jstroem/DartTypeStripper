@@ -6,34 +6,23 @@ import 'package:analyzer/src/services/formatter_impl.dart';
 import 'package:analyzer/src/generated/ast.dart';
 import 'package:analyzer/src/generated/scanner.dart';
 import 'package:path/path.dart';
+import 'package:args/args.dart';
 
 
 bool STRIP_METHOD_SIG = true;
 bool KEEP_GENERIC_TYPES = false;
-String OUTPUT_DIR = null;
+String OVERRIDE_FILE = null;
 
 main(List<String> args) {
-  if (args.length == 0) {
-    args = ["../tests/GenericType.dart"];
-  }
+  ArgParser argParser = new ArgParser();
+  argParser ..addFlag('partial', help: "If set don't strip the method signatures.", abbr: 'p', defaultsTo: false, negatable: false)
+            ..addFlag('strip-generics', help: "If set strips generic types.",  abbr: 'g', defaultsTo: false, negatable: false)
+            ..addFlag('override', help: "If set, overrides the files with the stripped version", abbr: 'w', defaultsTo: false, negatable: false);
+  ArgResults results = argParser.parse(args);
 
-  List<String> files = new List<String>();
-  
-  for (var i = 0; i < args.length; i++){
-    String arg = args[i];
-    if (arg == '--partial' || arg == '-p') {
-      STRIP_METHOD_SIG = false;
-    } else if (arg == '--keep-generics' || arg == '-g') {
-      KEEP_GENERIC_TYPES = true;
-    } else if (arg == '-o' || arg == '--output') {
-      OUTPUT_DIR = args[++i];
-    } else {
-      files.add(arg);
-    }
-  }
-  
-  Directory dir = null;
-  if (OUTPUT_DIR != null) dir = new Directory(OUTPUT_DIR);
+  List<String> files = results.rest;
+  STRIP_METHOD_SIG = !results['partial'];
+  KEEP_GENERIC_TYPES = results['strip-generics'];
   
   for (String arg in files) {
     CodeFormatterImpl cf = new StripCodeFormatterImpl(const FormatterOptions());
@@ -47,11 +36,10 @@ main(List<String> args) {
 
     
     fs = finisher.format(CodeKind.COMPILATION_UNIT, fs.source);
-    if (dir != null){
-      new File(dir.absolute.path + Platform.pathSeparator + basename(file.path)).writeAsStringSync(fs.source);  
-    } else {
-      stdout.write(fs.source);
-    }
+    if (results['override'])
+      file.writeAsStringSync(fs.source);
+    else
+      print(fs.source);
   }
 }
 
