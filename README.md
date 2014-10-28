@@ -9,13 +9,13 @@ This tool is written by Jesper Lindstrøm Nielsen and Troels Leth Jensen as part
 
 ## Install
 
-When cloned you should get the packages needed to use via. `pub build`.
+When cloned you should get the packages needed to use via. `pub get`.
 
 ## Run
 
 To use the tool just do:
 
-	./strip.dart [-p] [-o dir] file(s)
+	./strip.dart [-p] [-w --override] file(s)
 
 The tool implement these flags:
 
@@ -23,7 +23,7 @@ Partial `-p` or `--partial` that disables type stripping from method and functio
 
 Similarly, '-g' or '--keep-generics' preserves any naked generic types, i.e. T will be kept but List<T> will be removed in a class where T is a type argument.
 
-Output `-o` or `--output` gives the location to place the stripped files. If absent output will be printed to stdout.
+Override `-w` or `--override` flag to specify of the given file should be overriden whit the stripped result.
 
 
 
