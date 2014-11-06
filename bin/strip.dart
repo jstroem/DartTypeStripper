@@ -18,11 +18,12 @@ main(List<String> args) {
   argParser ..addFlag('partial', help: "If set don't strip the method signatures.", abbr: 'p', defaultsTo: false, negatable: false)
             ..addFlag('strip-generics', help: "If set strips generic types.",  abbr: 'g', defaultsTo: false, negatable: false)
             ..addFlag('override', help: "If set, overrides the files with the stripped version", abbr: 'w', defaultsTo: false, negatable: false);
+            
   ArgResults results = argParser.parse(args);
 
   List<String> files = results.rest;
   STRIP_METHOD_SIG = !results['partial'];
-  KEEP_GENERIC_TYPES = results['strip-generics'];
+  KEEP_GENERIC_TYPES = !results['strip-generics'];
   
   for (String arg in files) {
     CodeFormatterImpl cf = new StripCodeFormatterImpl(const FormatterOptions());
