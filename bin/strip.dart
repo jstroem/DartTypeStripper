@@ -26,8 +26,8 @@ main(List<String> args) {
   KEEP_GENERIC_TYPES = !results['strip-generics'];
   
   for (String arg in files) {
-    CodeFormatterImpl cf = new StripCodeFormatterImpl(const FormatterOptions());
-    CodeFormatter finisher = new CodeFormatter();
+    CodeFormatterImpl cf = new StripCodeFormatterImpl(const FormatterOptions(lineWidth: -1));
+    CodeFormatter finisher = new CodeFormatter(const FormatterOptions(lineWidth: -1));
     File file = new File(arg);
     var src = file.readAsStringSync();
     
