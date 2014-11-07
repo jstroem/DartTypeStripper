@@ -105,6 +105,14 @@ class StripSourceVisitor extends SourceVisitor {
     }
   }
   
+  visitFunctionTypeAlias(FunctionTypeAlias node) {
+    typeArguments.clear();
+    if (node.typeParameters != null) 
+        node.typeParameters.typeParameters.forEach((TypeParameter ty) => typeArguments.add(ty.name.toString()));
+
+    super.visitFunctionTypeAlias(node);
+  }
+
   visitClassDeclaration(ClassDeclaration node) {
     
       typeArguments.clear();
